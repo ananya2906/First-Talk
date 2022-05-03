@@ -9,7 +9,7 @@ import mediapipe as mp
 #============================
 #KEYPOINTS USING MP HOLISTIC
 #============================
-
+# globalvariable=[]
 mp_holistic = mp.solutions.holistic # Holistic model     
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 
@@ -118,7 +118,12 @@ for action in actions:
         except:
             pass
 
-
+def extract_keypoint(results):
+    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33*4)
+    # face = np.array([[res.x, res.y, res.z] for res in results.face_landmarks.landmark]).flatten() if results.face_landmarks else np.zeros(468*3)
+    lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(21*3)
+    rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21*3)
+    return np.concatenate([pose, lh, rh])
 #===============================================
 #Collect Keypoint Valuse for Training & Testing
 #===============================================
@@ -140,6 +145,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 
                 # Make detections
                 image, results = mediapipe_detection(frame, holistic)
+                # image, globalvariable = mediapipe_detection(frame, holistic)
                 #print(results)
 
                 # Draw landmarks
@@ -161,7 +167,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                     cv2.imshow('OpenCV Feed', image)
                 
                 # NEW Export keypoints
-                keypoints = extract_keypoints(results)
+                keypoints = extract_keypoint(results)
                 npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
                 np.save(npy_path, keypoints)
 
