@@ -1,3 +1,4 @@
+from pylab import *
 import cv2
 import numpy as np
 import os
@@ -22,14 +23,14 @@ def mediapipe_detection(image, model):
     return image, results
 
 def draw_landmarks(image, results):
-    mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACE_CONNECTIONS) # Draw face connections
+    # mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_CONTOURS) # Draw face connections
     mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS) # Draw pose connections
     mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS) # Draw left hand connections
     mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS) # Draw right hand connections
 
 def draw_styled_landmarks(image, results):
     # # Draw face connections
-    # mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACE_CONNECTIONS, 
+    # mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_CONTOURS, 
     #                          mp_drawing.DrawingSpec(color=(80,110,10), thickness=1, circle_radius=1), 
     #                          mp_drawing.DrawingSpec(color=(80,256,121), thickness=1, circle_radius=1)
     #                          ) 
@@ -106,7 +107,7 @@ DATA_PATH= "MP_Data"
 actions = np.array(['hello', 'thanks', 'iloveyou'])
 
 # Thirty videos worth of data
-no_sequences = 15
+no_sequences = 5
 
 # Videos are going to be 30 frames in length
 sequence_length = 30
@@ -232,14 +233,15 @@ log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir)
 
 model = Sequential()
-model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,1662)))
+model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,258)))
 model.add(LSTM(128, return_sequences=True, activation='relu'))
 model.add(LSTM(64, return_sequences=False, activation='relu'))
 model.add(Dense(64, activation='relu'))
 model.add(Dense(32, activation='relu'))
 model.add(Dense(actions.shape[0], activation='softmax'))
 
-actions[np.argmax(res)]
+# actions[np.argmax(res)]
 
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 model.fit(X_train, y_train, epochs=2000, callbacks=[tb_callback])
+model.summary()
