@@ -204,7 +204,7 @@ model.add(Dense(actions.shape[0], activation='softmax'))
 # actions[np.argmax(res)]
 
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-model.fit(X_train, y_train, epochs=200, callbacks=[tb_callback])
+model.fit(X_train, y_train, epochs=150, callbacks=[tb_callback])
 model.summary()
 
 
@@ -232,6 +232,26 @@ yhat = model.predict(X_test)
 ytrue = np.argmax(y_test, axis=1).tolist()
 yhat = np.argmax(yhat, axis=1).tolist()
 
+
+# #===============================
+# #Convert .h5 file to .pb file
+# #===============================
+
+# import tensorflow as tf
+
+# pre_model = tf.keras.models.load_model("action.h5")
+# pre_model.save("action.pb")
+
+
+# import tensorflow as tf
+
+# # Convert the model
+# converter = tf.lite.TFLiteConverter.from_saved_model('action.pb') # path to the SavedModel directory
+# tflite_model = converter.convert()
+
+# # Save the model.
+# with open('model.tflite', 'wb') as f:
+#   f.write(tflite_model)
 
 #===============================================
 # Test in Real Time
