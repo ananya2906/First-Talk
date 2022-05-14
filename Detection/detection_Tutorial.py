@@ -1,3 +1,4 @@
+from statistics import mode
 from turtle import bgcolor, color
 from pylab import *
 import cv2
@@ -60,7 +61,7 @@ def draw_styled_landmarks(image, results):
 # Path for exported data, numpy arrays
 
 # DATA_PATH = os.path.join('MP_Data') 
-DATA_PATH= "MP_Data"
+DATA_PATH= "./Detection/MP_Data"
 # isExist = os.path.exists(root_Directory)
 # print(isExist)
 
@@ -190,7 +191,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.callbacks import TensorBoard
 
-log_dir = os.path.join('Logs')
+log_dir = os.path.join('./Detection/Logs')
 tb_callback = TensorBoard(log_dir=log_dir)
 
 model = Sequential()
@@ -203,9 +204,13 @@ model.add(Dense(actions.shape[0], activation='softmax'))
 
 # actions[np.argmax(res)]
 
+from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LogisticRegression
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 model.fit(X_train, y_train, epochs=150, callbacks=[tb_callback])
 model.summary()
+
+# print(accuracy_score(X_test,y_test))
 
 
 #=====================
@@ -219,7 +224,7 @@ res = model.predict(X_test)
 #===============
 #Save Weights
 #===============
-model.save('action.h5')
+model.save('./Detection/action.h5')
 # del model
 # model.load_weights('action.h5')
 
@@ -267,13 +272,16 @@ cap = cv2.VideoCapture(0)
 # Set mediapipe model 
 with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
     while cap.isOpened():
-
+        
+        # print(type(cap.read()))
+        # # print(cap.read())
         # Read feed
         ret, frame = cap.read()
-
+        
         # Make detections
         image, results = mediapipe_detection(frame, holistic)
         print(results)
+        # print('=========')
         
         # Draw landmarks
         draw_styled_landmarks(image, results)
@@ -286,7 +294,11 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
         if len(sequence) == 30:
             res = model.predict(np.expand_dims(sequence, axis=0))[0]
             print(actions[np.argmax(res)])
+            # print('***************')
             predictions.append(np.argmax(res))
+            # print('&&&&&&&&&&&&&&&&&&')
+            # print(predictions)
+
             
         # #3. Viz logic
         #     if np.unique(predictions[-10:])[0]==np.argmax(res): 
