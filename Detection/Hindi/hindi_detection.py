@@ -225,7 +225,7 @@ res = model.predict(X_test)
 #===============
 #Save Weights
 #===============
-model.save('./Detection/Hindi/action.h5')
+model.save('./Detection/Hindi/hin_action.h5')
 # del model
 # model.load_weights('action.h5')
 
